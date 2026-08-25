@@ -13,6 +13,7 @@ import {
   LOADING_TEXTURE_KEY, LOADING_TEXTURE_PATH, PERCENT_TEXTURE_KEY, PERCENT_TEXTURE_PATH,
   HUD_DIGITS_SMALL_KEY, HUD_DIGITS_SMALL_PATH, HUD_DIGITS_SMALL_FRAME,
 } from './assets.js';
+import { skinAsset } from './skins.js';
 
 // Runs before BootScene so every ball/obstacle/power-up "element" (see
 // elements.js/elements/*.json) and every level (see levels/*.json) is
@@ -31,9 +32,9 @@ export class ElementsScene extends Phaser.Scene {
     // everything else in BootScene: it has to be drawable BEFORE the big
     // load it reports progress on begins (see BootScene.showLoadingScreen).
     // Only these three -- a handful of KB against the rest of the game.
-    this.load.image(LOADING_TEXTURE_KEY, LOADING_TEXTURE_PATH);
-    this.load.image(PERCENT_TEXTURE_KEY, PERCENT_TEXTURE_PATH);
-    this.load.spritesheet(HUD_DIGITS_SMALL_KEY, HUD_DIGITS_SMALL_PATH, HUD_DIGITS_SMALL_FRAME);
+    this.load.image(LOADING_TEXTURE_KEY, skinAsset(LOADING_TEXTURE_PATH));
+    this.load.image(PERCENT_TEXTURE_KEY, skinAsset(PERCENT_TEXTURE_PATH));
+    this.load.spritesheet(HUD_DIGITS_SMALL_KEY, skinAsset(HUD_DIGITS_SMALL_PATH), HUD_DIGITS_SMALL_FRAME);
 
     // Elements are named for what they are (round-ball-1.json,
     // powerup-time-freeze.json, ...) with no fixed convention to probe

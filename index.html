@@ -109,6 +109,13 @@
           <button id="btn-zoom-2x" class="menu-btn zoom-btn"></button>
           <button id="btn-zoom-fit" class="menu-btn zoom-btn"></button>
         </div>
+        <!-- One button per available skin, built by ui.js from the skin
+             registry (js/skins.js) -- hidden entirely when only one skin
+             exists, since a choice of one is not a choice. -->
+        <div id="skin-row" class="hidden">
+          <span id="skin-label"></span>
+          <span id="skin-buttons"></span>
+        </div>
         <button id="btn-options-fullscreen" class="menu-btn"></button>
       </div>
       <button id="btn-close-display" class="menu-btn"></button>

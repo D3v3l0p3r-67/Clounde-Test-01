@@ -96,7 +96,7 @@ function runtimeFiles(dir = '') {
     if (/^\./.test(entry)) continue;
     const rel = dir ? `${dir}/${entry}` : entry;
     if (statSync(join(ROOT, rel)).isDirectory()) {
-      if (!dir && !['js', 'assets', 'levels', 'elements'].includes(entry)) continue;
+      if (!dir && !['js', 'assets', 'levels', 'elements', 'skins'].includes(entry)) continue;
       out.push(...runtimeFiles(rel));
     } else if (dir || ['index.html', 'style.css', 'manifest.webmanifest', 'favicon.ico'].includes(entry)) {
       out.push(rel);

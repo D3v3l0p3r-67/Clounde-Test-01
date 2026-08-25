@@ -1,5 +1,6 @@
 import { COLORS, VIRTUAL_W } from './constants.js';
 import { INTRO_FONT_PATH, INTRO_FONT_FRAME, INTRO_FONT_CHARS } from './assets.js';
+import { skinAsset, skinFont } from './skins.js';
 
 // The DOM equivalent of LevelIntro.js's Phaser text -- every menu screen
 // (main menu, options, level select, pause, game over, victory, high
@@ -15,22 +16,32 @@ const CELL_W = INTRO_FONT_FRAME.frameWidth;
 const CELL_H = INTRO_FONT_FRAME.frameHeight;
 const GAP = 1; // 1 font-pixel between characters, pre-scale
 
+// A skin may carry its own DOM menu font at `res` times the base cell
+// (see js/skins.js's skinFont): glyphs are drawn at that resolution and
+// shown at the SAME on-screen size, so a smooth skin's text is genuinely
+// smooth instead of upscaled 5x6 blocks -- while every width, gap and
+// layout stays in base units and nothing else in this file changes
+// meaning. res is 1 (and the font the base bitmap) unless a skin says
+// otherwise; read lazily because the skin is only decided at boot,
+// before the first text is ever rendered (see main.js's initSkins).
 let fontImage = null;
 let loadPromise = null;
+let res = 1;
 
 function ensureLoaded() {
   if (loadPromise) return loadPromise;
   loadPromise = new Promise((resolve) => {
+    const font = skinFont();
+    res = font?.scale ?? 1;
     const img = new Image();
     img.onload = () => {
       fontImage = img;
       resolve();
     };
-    img.src = INTRO_FONT_PATH;
+    img.src = font?.path ?? skinAsset(INTRO_FONT_PATH);
   });
   return loadPromise;
 }
-ensureLoaded();
 
 function drawInto(canvas, text) {
   const upper = String(text).toUpperCase();
@@ -40,8 +51,11 @@ function drawInto(canvas, text) {
   let x = 0;
   for (const ch of upper) {
     const idx = INTRO_FONT_CHARS.indexOf(ch);
-    if (idx !== -1) ctx.drawImage(fontImage, idx * CELL_W, 0, CELL_W, CELL_H, x, 0, CELL_W, CELL_H);
-    x += CELL_W + GAP;
+    if (idx !== -1) {
+      ctx.drawImage(fontImage, idx * CELL_W * res, 0, CELL_W * res, CELL_H * res,
+        x, 0, CELL_W * res, CELL_H * res);
+    }
+    x += (CELL_W + GAP) * res;
   }
 }
 
@@ -95,10 +109,12 @@ export function renderPixelText(text, tier = 'body', color = COLORS.text) {
   const scale = typeof tier === 'number' ? tier : responsiveScale(tier);
   const canvas = document.createElement('canvas');
   canvas.className = 'pixel-text';
-  canvas.width = Math.max(1, widthFor(text));
-  canvas.height = CELL_H;
-  canvas.style.width = `${canvas.width * scale}px`;
-  canvas.style.height = `${canvas.height * scale}px`;
+  canvas.width = Math.max(1, widthFor(text) * res);
+  canvas.height = CELL_H * res;
+  // Style size is in BASE units: a skin font at 3x the resolution shows
+  // at exactly the size the 1x font would, only sharper.
+  canvas.style.width = `${(canvas.width / res) * scale}px`;
+  canvas.style.height = `${(canvas.height / res) * scale}px`;
 
   const entry = { canvas, text, tier, color };
   registry.push(entry);
@@ -144,8 +160,8 @@ function rescaleAll() {
       continue;
     }
     const scale = typeof entry.tier === 'number' ? entry.tier : responsiveScale(entry.tier);
-    entry.canvas.style.width = `${entry.canvas.width * scale}px`;
-    entry.canvas.style.height = `${entry.canvas.height * scale}px`;
+    entry.canvas.style.width = `${(entry.canvas.width / res) * scale}px`;
+    entry.canvas.style.height = `${(entry.canvas.height / res) * scale}px`;
   }
 }
 

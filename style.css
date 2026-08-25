@@ -137,6 +137,7 @@ body {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  /* (a skin drawn smooth lifts this -- see body.skin-smooth below) */
   background: #0b0e2a;
   display: block;
 }
@@ -215,6 +216,17 @@ body {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  /* (a skin drawn smooth lifts this -- see body.skin-smooth below) */
+}
+
+/* A skin whose manifest says render.pixelArt: false (js/skins.js sets the
+   class): its art is anti-aliased, so the chunky nearest-neighbour
+   upscaling that makes pixel art crisp would make it jagged instead.
+   One switch, both canvases -- the game's and every menu text's. */
+body.skin-smooth #game-container > canvas,
+body.skin-smooth .pixel-text,
+body.skin-smooth .card-hint canvas {
+  image-rendering: auto;
 }
 
 .screen h1 {
@@ -355,7 +367,9 @@ body {
 /* Display size -- exactly three discrete choices (see constants.js's
    ZOOM_LEVELS / DisplayZoom.js), not a slider, since there's nothing
    continuous to pick between. */
-#zoom-row {
+#zoom-row,
+#skin-row,
+#skin-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
