@@ -23,6 +23,9 @@
 //              to the document, which is how the DOM menus, buttons and
 //              panels are themed -- style.css already reads everything
 //              through these variables.
+//   colors     the JS-side palette (constants.js's COLORS): what the
+//              canvas itself paints with -- HUD tints, the sky gradient,
+//              danger red. Only keys COLORS already has are applied.
 //   render     { pixelArt: false } marks a skin drawn smooth rather than
 //              blocky: Phaser switches to linear texture filtering and a
 //              `skin-smooth` body class lifts the CSS `image-rendering:
@@ -47,6 +50,7 @@
 // boots exactly as it did before skins existed.
 
 import * as storage from './storage.js';
+import { COLORS } from './constants.js';
 
 export const SKINS_DIR = 'skins/';
 export const SKINS_INDEX_PATH = 'skins/index.json';
@@ -108,6 +112,16 @@ export async function initSkins() {
 
   for (const [key, value] of Object.entries(manifest.style ?? {})) {
     if (key.startsWith('--')) document.documentElement.style.setProperty(key, value);
+  }
+  // The JS-side palette: what the canvas paints with (HUD tints, the sky
+  // gradient GameScene draws, danger red...). Only keys COLORS already
+  // has -- a skin retunes the palette, it does not grow one. Applied
+  // before the Phaser game is even constructed, so every scene reads the
+  // skinned values; the one exception is a module that converted a color
+  // at import time, which keeps the base value (LevelTransition does --
+  // an acceptable seam, noted rather than hidden).
+  for (const [key, value] of Object.entries(manifest.colors ?? {})) {
+    if (key in COLORS) COLORS[key] = value;
   }
   document.body.classList.add(`skin-${state.activeId}`);
   if (manifest.render?.pixelArt === false) document.body.classList.add('skin-smooth');

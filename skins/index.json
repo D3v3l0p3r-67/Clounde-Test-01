@@ -1,4 +1,7 @@
 {
   "default": "pixel",
-  "skins": ["pixel"]
+  "skins": [
+    "pixel",
+    "sleek"
+  ]
 }
