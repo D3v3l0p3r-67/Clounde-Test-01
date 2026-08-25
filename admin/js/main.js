@@ -3,6 +3,7 @@ import { initGraphicsTab } from './graphicsTab.js';
 import { initSoundsTab } from './soundsTab.js';
 import { initElementsTab } from './elementsTab.js';
 import { initLevelsTab } from './levelsTab.js';
+import { initSkinsTab } from './skinsTab.js';
 
 // Login is a real server-side gate now (see includes/auth.php) -- this
 // page only ever renders once index.php has already confirmed a valid
@@ -17,12 +18,14 @@ const tabPanels = {
   sounds: document.getElementById('tab-sounds'),
   elements: document.getElementById('tab-elements'),
   levels: document.getElementById('tab-levels'),
+  skins: document.getElementById('tab-skins'),
 };
 const tabInitializers = {
   graphics: initGraphicsTab,
   sounds: initSoundsTab,
   elements: initElementsTab,
   levels: initLevelsTab,
+  skins: initSkinsTab,
 };
 const loadedTabs = new Set();
 

@@ -6,6 +6,7 @@ import { getZoom, setZoom, watchViewport } from './DisplayZoom.js';
 import { isMobileDevice } from './input.js';
 import { initInstall, promptInstall, lockLandscape, isStandalone } from './pwa.js';
 import { fileSaving } from './levelFile.js';
+import { availableSkins, activeSkinId, chooseSkin } from './skins.js';
 import { ACTIONS, getBindings, setBinding, keyLabel, captureNextKey } from './keys.js';
 
 // zoom value -> the DISPLAY screen button that selects it (see
@@ -47,6 +48,7 @@ const ELEMENT_IDS = [
   'chk-mute-label', 'rng-sfx-label', 'rng-music-label',
   'screen-display', 'display-title', 'btn-close-display',
   'zoom-label', 'btn-zoom-half', 'btn-zoom-1x', 'btn-zoom-2x', 'btn-zoom-fit',
+  'skin-row', 'skin-label', 'skin-buttons',
   'screen-keys', 'keys-title', 'keys-list', 'btn-close-keys',
   'screen-erase', 'erase-title', 'btn-close-erase',
   'screen-level-select', 'level-select-title', 'level-select-list',
@@ -87,6 +89,7 @@ const STATIC_LABELS = [
   ['rng-sfx-label', 'SFX', 'body', COLORS.text],
   ['rng-music-label', 'MUSIC', 'body', COLORS.text],
   ['zoom-label', 'SIZE', 'body', COLORS.text],
+  ['skin-label', 'SKIN', 'body', COLORS.text],
   ['btn-zoom-half', '0.5X', 'button', COLORS.text],
   ['btn-zoom-1x', '1X', 'button', COLORS.text],
   ['btn-zoom-2x', '2X', 'button', COLORS.text],
@@ -238,6 +241,12 @@ export class UI {
 
     this.el['btn-highscores'].addEventListener('click', () => this.game.showHighScores());
     this.el['btn-close-highscores'].addEventListener('click', () => this.game.goToMenu());
+
+    // The skin picker: one button per enabled skin, the active one marked
+    // like the zoom row above it. Choosing saves and reloads the page --
+    // every texture in the game changes, and a fresh boot is the one path
+    // that cannot leave a stale one behind (see js/skins.js).
+    this.buildSkinRow();
 
     this.el['btn-quit-game'].addEventListener('click', () => {
       window.close();
@@ -545,6 +554,22 @@ export class UI {
   // button stays hidden until it answers -- so a player who is not an
   // admin never sees it flash. On a static host (GitHub Pages, no PHP)
   // the probe is one 404 and the answer is no.
+  buildSkinRow() {
+    const skins = availableSkins();
+    if (skins.length < 2) return; // a choice of one is not a choice
+    this.el['skin-row'].classList.remove('hidden');
+    for (const { id, name } of skins) {
+      const btn = document.createElement('button');
+      btn.className = 'menu-btn zoom-btn';
+      btn.classList.toggle('active', id === activeSkinId());
+      setPixelText(btn, name.toUpperCase(), 'button', COLORS.text);
+      btn.addEventListener('click', () => {
+        if (id !== activeSkinId()) chooseSkin(id);
+      });
+      this.el['skin-buttons'].appendChild(btn);
+    }
+  }
+
   // QUIT GAME only where quitting is a thing that can happen. A browser
   // tab may not close itself -- window.close() is ignored for anything
   // the page did not open -- so in a tab this would be a button that does

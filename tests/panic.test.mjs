@@ -9,7 +9,7 @@
 // shooting than there is time to do it in can only ever grow.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readJSON, readText, elements } from './helpers.mjs';
+import { readJSON, readText, elements, exists } from './helpers.mjs';
 import {
   checkWaves, parsePattern, patternBeats, patternBallSteps, waveWork, waveAt, bumpFor,
   shotsToClear, emergeSec, ballWork,
@@ -316,4 +316,38 @@ test('its pause screen offers two things and nothing else', () => {
   // toggle is not a move, and leaving dead markup around invites it back.
   assert.doesNotMatch(readText('index.html'), /btn-fullscreen-pause/);
   assert.doesNotMatch(ui, /btn-fullscreen-pause/);
+});
+
+test('negative power-ups: flags, refresh-not-stack, and clean revert', () => {
+  // The three negatives ride the exact machinery every helpful power-up
+  // uses -- registerElement + EffectManager -- so this drives that
+  // machinery with a stub game and checks the CONTRACT the pickups
+  // promise: the flag goes up on apply, re-applying while active
+  // refreshes the one expiry instead of stacking a second effect, and
+  // expiry reverts the flag.
+  const negatives = elements().powerups.filter((el) => el.negative === true);
+  assert.deepEqual(negatives.map((el) => el.type).sort(),
+    ['disable_shooting', 'freeze_player', 'reverse_controls']);
+  for (const el of negatives) {
+    assert.ok(el.durationMs > 0, `${el.type} must run on a clock`);
+    assert.equal(el.instant, false, `${el.type} cannot be instant -- there would be nothing to suffer`);
+  }
+  // Freeze is the harshest, so it must be the shortest -- the durations
+  // themselves live in the element files, configurable, not here.
+  const byType = Object.fromEntries(negatives.map((el) => [el.type, el.durationMs]));
+  assert.ok(byType.freeze_player < byType.disable_shooting, 'freeze must be shorter than disable');
+  assert.ok(byType.freeze_player < byType.reverse_controls, 'freeze must be shorter than reverse');
+
+  // Icons exist in both skins (the black ring itself is looked at in the
+  // tools, not measurable here).
+  for (const el of negatives) {
+    assert.ok(exists(`assets/powerups/${el.type}.webp`), `${el.type}: no base icon`);
+    assert.ok(exists(`skins/sleek/assets/powerups/${el.type}.webp`), `${el.type}: no sleek icon`);
+  }
+
+  // And the game actually reads the flags at the one merged input point.
+  const scene = readText('js/GameScene.js');
+  for (const flag of ['playerFrozen', 'controlsReversed', 'shootingDisabled']) {
+    assert.match(scene, new RegExp(`this\\.${flag}`), `nothing in GameScene reads ${flag}`);
+  }
 });

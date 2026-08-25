@@ -193,6 +193,41 @@ export const POWERUP_BEHAVIORS = {
     apply(game) { game.player.shielded = true; },
     revert(game) { game.player.shielded = false; },
   },
+  // -- Negative power-ups -------------------------------------------------
+  //
+  // Same machinery as every helpful one -- a kind, an apply/revert pair,
+  // a durationMs on the element -- pointed the other way. All three work
+  // on the ONE merged input path (GameScene.updatePlaying reshapes the
+  // input object after readInput()), never on the entities: keyboard,
+  // touch, and anything that might drive the player in the future are
+  // all upstream of that point, so they are all affected alike, and
+  // reverting is dropping a flag rather than un-editing physics.
+  //
+  // Re-picking one up while it runs REFRESHES it instead of stacking:
+  // apply() is an idempotent flag-set and EffectManager overwrites the
+  // expiry it holds for an already-active type (see weapons.js).
+
+  // Left is right, up is down, for the duration. Shoot is deliberately
+  // not swapped with anything -- there is nothing opposite to it, and a
+  // trigger that stopped working would be disable_shooting's job.
+  reverse_controls: {
+    apply(game) { game.controlsReversed = true; },
+    revert(game) { game.controlsReversed = false; },
+  },
+  // The trigger goes dead; walking, climbing and everything else stays.
+  disable_shooting: {
+    apply(game) { game.shootingDisabled = true; },
+    revert(game) { game.shootingDisabled = false; },
+  },
+  // The player can neither move nor shoot -- gravity still applies, so a
+  // frozen player finishes falling rather than hanging in the air. The
+  // icy tint is the on-field half of the indication (the HUD countdown
+  // is the other); revert clears it, and so does the level reload a lost
+  // life causes (effects.reset runs every revert).
+  freeze_player: {
+    apply(game) { game.playerFrozen = true; game.player.setTint(0x9bd1f0); },
+    revert(game) { game.playerFrozen = false; game.player.clearTint(); },
+  },
   // Swapping the weapon in hand. Instant and for keeps: a weapon is what
   // the player is holding, not an effect running on a clock, so there is
   // nothing to revert -- the level's own weapon comes back when the level
@@ -254,6 +289,11 @@ export function registerElement(el, harpoon) {
       // -- "no other weapons" is `give_weapon`, and stays right when a
       // fourth weapon is added (see GameScene.dropPowerupTypes).
       kind: el.kind,
+      // A power-up the player does NOT want. Data, not behavior: the
+      // black ring on its icon is drawn from this by the icon tools, the
+      // HUD shows its countdown in danger red, and a level could exclude
+      // the whole class the way panic excludes weapons.
+      negative: el.negative === true,
       color: el.color,
       durationMs: el.durationMs,
       instant: el.instant,

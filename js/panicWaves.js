@@ -155,7 +155,7 @@ export function bumpFor(cycle, loop) {
 //
 // `maxSize` is the largest size each shape actually has an element for
 // (hex stops at 3), so a bump can never name a ball that does not exist.
-export function escalate(steps, bump, maxSize) {
+function escalate(steps, bump, maxSize) {
   if (!bump) return steps;
   const keepEvery = 2 ** bump;
   let nth = -1;

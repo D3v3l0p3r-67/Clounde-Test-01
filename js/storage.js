@@ -10,7 +10,7 @@ const KEYS = {
 
 const MAX_HIGH_SCORES = 10;
 
-const DEFAULT_SETTINGS = { schemaVersion: SCHEMA_VERSION, muted: false, sfxVolume: 0.8, musicVolume: 0.6, zoom: DEFAULT_ZOOM };
+const DEFAULT_SETTINGS = { schemaVersion: SCHEMA_VERSION, muted: false, sfxVolume: 0.8, musicVolume: 0.6, zoom: DEFAULT_ZOOM, skin: '' };
 const DEFAULT_HIGH_SCORES = { schemaVersion: SCHEMA_VERSION, entries: [] };
 // unlockedLevels is a count, not an index: 1 means only LEVELS[0] is
 // playable from Start Level, 2 means LEVELS[0..1], etc. -- level 1 is

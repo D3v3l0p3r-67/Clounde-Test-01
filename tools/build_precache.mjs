@@ -31,7 +31,7 @@ const WORKER = join(ROOT, 'service-worker.js');
 // from. Order matters only in that the shell comes first -- the service
 // worker treats the first entries as the ones that MUST cache.
 const ROOT_FILES = ['index.html', 'style.css', 'manifest.webmanifest', 'favicon.ico'];
-const DIRS = ['js', 'assets', 'levels', 'elements'];
+const DIRS = ['js', 'assets', 'levels', 'elements', 'skins'];
 
 // Never cached, wherever they turn up: editor/OS leftovers and source
 // maps, none of which the game asks for.

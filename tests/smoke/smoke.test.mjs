@@ -100,15 +100,24 @@ test('the player walks, shoots, and pops what it hits', async () => {
   const movedX = await game.scene((s) => s.player.x);
   assert.ok(movedX > startX + 10, `player barely moved: ${startX} -> ${movedX}`);
 
-  // A ball may well have caught the player during that walk, which
-  // freezes the level and restarts it -- and a frozen player cannot
-  // shoot. Wait for play to be handed back before asking it to.
-  await game.page.waitForFunction(
-    () => window.game.scene.getScene('Game').state === 'PLAYING', null, { timeout: 30000 },
-  );
-  await game.page.keyboard.press('Space');
-  await game.frames(3);
-  assert.ok(await game.scene((s) => s.projectiles.countActive(true)) > 0, 'pressing shoot fired nothing');
+  // A ball may well catch the player around any of this, which freezes
+  // the level and restarts it -- and a frozen player cannot shoot. That
+  // can happen in the very gap between confirming PLAYING and the key
+  // landing, so the press is retried rather than trusted once: each
+  // attempt waits play out, fires, and checks. What is being tested --
+  // that a shoot press in play fires a shot -- is exactly what the loop
+  // settles.
+  let fired = false;
+  for (let attempt = 0; attempt < 5 && !fired; attempt++) {
+    await game.page.waitForFunction(
+      () => window.game.scene.getScene('Game').state === 'PLAYING', null, { timeout: 30000 },
+    );
+    await game.page.keyboard.press('Space');
+    await game.frames(3);
+    fired = await game.scene((s) => s.projectiles.countActive(true) > 0);
+    if (!fired) await game.frames(30); // let a mid-press hit finish its freeze
+  }
+  assert.ok(fired, 'pressing shoot fired nothing, five attempts running');
 
   // And a shot that reaches a ball pops it. Driven through popBall rather
   // than by waiting for a hit, because where the balls happen to be is
@@ -286,28 +295,32 @@ test('erasing progress takes the scores and leaves the settings', async () => {
   await game.scene((s) => s.showOptions());
   await game.frames(3);
 
-  // Nothing happens on the first press but being asked, and answering no
-  // has to leave every last thing alone.
+  // ERASE PROGRESS is a door, not an action (see the README's Options
+  // notes): opening the screen does nothing, and CANCEL has to leave
+  // every last thing alone.
   await game.page.click('#btn-erase');
   await game.frames(2);
-  assert.equal(await game.page.evaluate(() => document.getElementById('erase-confirm').classList.contains('hidden')), false,
-    'ERASE PROGRESS should ask before doing anything');
-  await game.page.click('#btn-erase-no');
+  assert.equal(await game.scene((s) => s.state), 'ERASE', 'ERASE PROGRESS should only open the screen that asks');
+  assert.equal((await keys()).length, 5, 'opening the erase screen erased something');
+  await game.page.click('#btn-close-erase');
   await game.frames(2);
   assert.equal((await keys()).length, 5, 'cancelling erased something');
 
   await game.page.click('#btn-erase');
+  await game.frames(2);
   await game.page.click('#btn-erase-yes');
   await game.frames(2);
   assert.deepEqual(await keys(), ['balloonBuster.levelEdits', 'balloonBuster.settings'],
     'erasing progress must take the scores, the unlocks and the times -- and nothing else');
 
-  await game.scene((s) => s.goToMenu());
+  await game.page.click('#btn-close-erase');
   await game.frames(2);
-  await game.scene((s) => s.showOptions());
+  await game.page.click('#btn-erase');
   await game.frames(2);
   assert.equal(await game.page.evaluate(() => document.getElementById('erase-done').classList.contains('hidden')), true,
-    'reopening options should not still be announcing a previous erase');
+    'reopening the erase screen should not still be announcing a previous erase');
+  await game.page.click('#btn-close-erase');
+  await game.frames(2);
   await game.scene((s) => s.goToMenu());
   assert.equal(drainErrors(), '');
 });

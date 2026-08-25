@@ -1,5 +1,6 @@
 import { VIRTUAL_W, PLAYFIELD_H, HUD_H, GAME_STATES, COLORS } from './constants.js';
 import { WEAPON_TYPES } from './config.js';
+import { POWERUP_TYPES } from './elements.js';
 import * as assets from './assets.js';
 import * as storage from './storage.js';
 import { hexColor } from './colors.js';
@@ -241,6 +242,11 @@ export class Hud {
       slot.icon.setVisible(true);
       slot.icon.setTexture(assets.powerupTextureKey(type));
       slot.digits.setValue(Math.max(0, Math.ceil((expiresAt - g.elapsedMs) / 1000)));
+      // A negative effect's clock is a countdown to RELIEF, and it reads
+      // in the same danger red the level clock turns when it is the
+      // threat -- the icon's black ring says which kind this is from
+      // across the bar, the colour says it up close.
+      slot.digits.setTint(POWERUP_TYPES[type].negative ? DANGER : ACCENT);
     }
     for (let i = slotIndex; i < this.powerupSlots.length; i++) {
       this.powerupSlots[i].icon.setVisible(false);

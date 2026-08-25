@@ -35,6 +35,7 @@ import {
   INTRO_FONT_KEY, INTRO_FONT_PATH, INTRO_FONT_FRAME,
 } from './assets.js';
 import { gameAnimations, ballPopFrameSize } from './animations.js';
+import { skinAsset } from './skins.js';
 
 // Shortest time the loading screen stays up before Game takes over -- see
 // the hold at the end of create().
@@ -54,46 +55,50 @@ export class BootScene extends Phaser.Scene {
 
   preload() {
     this.showLoadingScreen();
+    // Every path below goes through skinAsset(): the active skin's copy
+    // where its manifest lists one, the base file otherwise (js/skins.js).
+    // Keys never change -- a skin swaps what is UNDER a key, so no entity
+    // knows or cares which skin is loaded.
 
     for (const el of BALL_ELEMENTS) {
       // Hex balls spin (see Ball.js/assets.js's HEX_SPIN_FRAMES) so their
       // own texture is a spritesheet; round balls are one static image.
       if (el.shape === 'hex') {
-        this.load.spritesheet(ballTextureKey(el.shape, el.size), ballTexturePath(el.shape, el.size), { frameWidth: el.radius * 2, frameHeight: el.radius * 2 });
+        this.load.spritesheet(ballTextureKey(el.shape, el.size), skinAsset(ballTexturePath(el.shape, el.size)), { frameWidth: el.radius * 2, frameHeight: el.radius * 2 });
       } else {
-        this.load.image(ballTextureKey(el.shape, el.size), ballTexturePath(el.shape, el.size));
+        this.load.image(ballTextureKey(el.shape, el.size), skinAsset(ballTexturePath(el.shape, el.size)));
       }
 
       const popFrameSize = ballPopFrameSize(el.radius);
-      this.load.spritesheet(ballPopTextureKey(el.shape, el.size), ballPopTexturePath(el.shape, el.size), { frameWidth: popFrameSize, frameHeight: popFrameSize });
+      this.load.spritesheet(ballPopTextureKey(el.shape, el.size), skinAsset(ballPopTexturePath(el.shape, el.size)), { frameWidth: popFrameSize, frameHeight: popFrameSize });
     }
 
-    this.load.spritesheet(PLAYER_TEXTURE_KEY, PLAYER_TEXTURE_PATH, PLAYER_FRAME);
-    this.load.spritesheet(PLAYER_SHIELD_TEXTURE_KEY, PLAYER_SHIELD_TEXTURE_PATH, { frameWidth: PLAYER_CONFIG.shieldSize, frameHeight: PLAYER_CONFIG.shieldSize });
-    this.load.spritesheet(PLAYER_HIT_TEXTURE_KEY, PLAYER_HIT_TEXTURE_PATH, { frameWidth: PLAYER_HIT_SIZE, frameHeight: PLAYER_HIT_SIZE });
-    this.load.spritesheet(PLAYER_DUST_TEXTURE_KEY, PLAYER_DUST_TEXTURE_PATH, { frameWidth: PLAYER_DUST_SIZE, frameHeight: PLAYER_DUST_HEIGHT });
-    this.load.spritesheet(PLAYER_GHOST_TEXTURE_KEY, PLAYER_GHOST_TEXTURE_PATH, PLAYER_GHOST_FRAME);
-    this.load.image(BULLET_TEXTURE_KEY, BULLET_TEXTURE_PATH);
-    this.load.spritesheet(BULLET_HIT_TEXTURE_KEY, BULLET_HIT_TEXTURE_PATH, { frameWidth: BULLET_HIT_SIZE, frameHeight: BULLET_HIT_SIZE });
-    this.load.spritesheet(BEAM_HIT_TEXTURE_KEY, BEAM_HIT_TEXTURE_PATH, BEAM_HIT_FRAME);
-    this.load.image(WORLDMAP_TEXTURE_KEY, WORLDMAP_TEXTURE_PATH);
-    this.load.image(PLANE_TEXTURE_KEY, PLANE_TEXTURE_PATH);
+    this.load.spritesheet(PLAYER_TEXTURE_KEY, skinAsset(PLAYER_TEXTURE_PATH), PLAYER_FRAME);
+    this.load.spritesheet(PLAYER_SHIELD_TEXTURE_KEY, skinAsset(PLAYER_SHIELD_TEXTURE_PATH), { frameWidth: PLAYER_CONFIG.shieldSize, frameHeight: PLAYER_CONFIG.shieldSize });
+    this.load.spritesheet(PLAYER_HIT_TEXTURE_KEY, skinAsset(PLAYER_HIT_TEXTURE_PATH), { frameWidth: PLAYER_HIT_SIZE, frameHeight: PLAYER_HIT_SIZE });
+    this.load.spritesheet(PLAYER_DUST_TEXTURE_KEY, skinAsset(PLAYER_DUST_TEXTURE_PATH), { frameWidth: PLAYER_DUST_SIZE, frameHeight: PLAYER_DUST_HEIGHT });
+    this.load.spritesheet(PLAYER_GHOST_TEXTURE_KEY, skinAsset(PLAYER_GHOST_TEXTURE_PATH), PLAYER_GHOST_FRAME);
+    this.load.image(BULLET_TEXTURE_KEY, skinAsset(BULLET_TEXTURE_PATH));
+    this.load.spritesheet(BULLET_HIT_TEXTURE_KEY, skinAsset(BULLET_HIT_TEXTURE_PATH), { frameWidth: BULLET_HIT_SIZE, frameHeight: BULLET_HIT_SIZE });
+    this.load.spritesheet(BEAM_HIT_TEXTURE_KEY, skinAsset(BEAM_HIT_TEXTURE_PATH), BEAM_HIT_FRAME);
+    this.load.image(WORLDMAP_TEXTURE_KEY, skinAsset(WORLDMAP_TEXTURE_PATH));
+    this.load.image(PLANE_TEXTURE_KEY, skinAsset(PLANE_TEXTURE_PATH));
 
     const tileNames = new Set(OBSTACLE_TYPE_KEYS.map((type) => OBSTACLE_TYPES[type].tileTexture));
     for (const name of tileNames) {
-      this.load.image(obstacleTextureKey(name), obstacleTexturePath(name));
+      this.load.image(obstacleTextureKey(name), skinAsset(obstacleTexturePath(name)));
     }
 
     const ladderNames = new Set(LADDER_TYPE_KEYS.map((type) => LADDER_TYPES[type].texture));
     for (const name of ladderNames) {
-      this.load.image(ladderTextureKey(name), ladderTexturePath(name));
+      this.load.image(ladderTextureKey(name), skinAsset(ladderTexturePath(name)));
     }
 
-    this.load.spritesheet(WEAPON_SHOTS_KEY, WEAPON_SHOTS_PATH, WEAPON_SHOTS_FRAME);
-    this.load.image(PARTICLE_TEXTURE_KEY, PARTICLE_TEXTURE_PATH);
+    this.load.spritesheet(WEAPON_SHOTS_KEY, skinAsset(WEAPON_SHOTS_PATH), WEAPON_SHOTS_FRAME);
+    this.load.image(PARTICLE_TEXTURE_KEY, skinAsset(PARTICLE_TEXTURE_PATH));
 
     for (const type of POWERUP_TYPE_KEYS) {
-      this.load.image(powerupTextureKey(type), powerupTexturePath(type));
+      this.load.image(powerupTextureKey(type), skinAsset(powerupTexturePath(type)));
     }
 
     // DEFAULT_BACKGROUND is always loaded (the level editor's own starting
@@ -109,7 +114,7 @@ export class BootScene extends Phaser.Scene {
       ...daylightBackgroundNames(),
     ]);
     for (const name of backgroundNames) {
-      this.load.image(backgroundTextureKey(name), backgroundTexturePath(name));
+      this.load.image(backgroundTextureKey(name), skinAsset(backgroundTexturePath(name)));
     }
 
     // AUDIO_CONFIG is already fully populated by ElementsScene (audio.json
@@ -128,24 +133,24 @@ export class BootScene extends Phaser.Scene {
     // ensureMusicLoaded / GameScene.loadLevel).
     for (const [name, cfg] of Object.entries(AUDIO_CONFIG)) {
       if (cfg.category === 'music') continue;
-      this.load.audio(name, audioPath(cfg.file));
+      this.load.audio(name, skinAsset(audioPath(cfg.file)));
     }
 
-    this.load.spritesheet(HUD_DIGITS_LARGE_KEY, HUD_DIGITS_LARGE_PATH, HUD_DIGITS_LARGE_FRAME);
+    this.load.spritesheet(HUD_DIGITS_LARGE_KEY, skinAsset(HUD_DIGITS_LARGE_PATH), HUD_DIGITS_LARGE_FRAME);
     // HUD_DIGITS_SMALL is deliberately NOT loaded here -- ElementsScene
     // already loaded it, because this scene's own loading screen prints
     // its progress percentage with it (see showLoadingScreen below).
-    this.load.image(HUD_1P_KEY, HUD_1P_PATH);
-    this.load.image(HUD_TIME_LABEL_KEY, HUD_TIME_LABEL_PATH);
-    this.load.image(HUD_LEVEL_LABEL_KEY, HUD_LEVEL_LABEL_PATH);
-    this.load.image(HUD_HI_LABEL_KEY, HUD_HI_LABEL_PATH);
-    this.load.image(HUD_LIFE_KEY, HUD_LIFE_PATH);
-    this.load.image(HUD_WEAPON_FRAME_KEY, HUD_WEAPON_FRAME_PATH);
+    this.load.image(HUD_1P_KEY, skinAsset(HUD_1P_PATH));
+    this.load.image(HUD_TIME_LABEL_KEY, skinAsset(HUD_TIME_LABEL_PATH));
+    this.load.image(HUD_LEVEL_LABEL_KEY, skinAsset(HUD_LEVEL_LABEL_PATH));
+    this.load.image(HUD_HI_LABEL_KEY, skinAsset(HUD_HI_LABEL_PATH));
+    this.load.image(HUD_LIFE_KEY, skinAsset(HUD_LIFE_PATH));
+    this.load.image(HUD_WEAPON_FRAME_KEY, skinAsset(HUD_WEAPON_FRAME_PATH));
     for (const type of Object.keys(WEAPON_TYPES)) {
-      this.load.image(hudWeaponIconKey(type), hudWeaponIconPath(type));
+      this.load.image(hudWeaponIconKey(type), skinAsset(hudWeaponIconPath(type)));
     }
 
-    this.load.spritesheet(INTRO_FONT_KEY, INTRO_FONT_PATH, INTRO_FONT_FRAME);
+    this.load.spritesheet(INTRO_FONT_KEY, skinAsset(INTRO_FONT_PATH), INTRO_FONT_FRAME);
   }
 
   // The first-load screen: the splash image (see assets.js's

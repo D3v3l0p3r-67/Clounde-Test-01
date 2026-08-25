@@ -10,6 +10,7 @@
 // change. Same mutable-registry pattern as elements.js's BALL_ELEMENTS/
 // POWERUP_TYPES and LevelManager's LEVELS.
 import { audioPath } from './assets.js';
+import { skinAsset } from './skins.js';
 
 export const AUDIO_CONFIG = {}; // name -> {file, category, volume, mode, overlap, maxDurationMs?}
 
@@ -129,7 +130,7 @@ export class AudioManager {
       const onError = (file) => { if (file.key === name) done(false); };
       loader.on(`filecomplete-audio-${name}`, onDone);
       loader.on('loaderror', onError);
-      loader.audio(name, audioPath(cfg.file));
+      loader.audio(name, skinAsset(audioPath(cfg.file)));
       loader.start();
     });
     this.musicLoads.set(name, load);

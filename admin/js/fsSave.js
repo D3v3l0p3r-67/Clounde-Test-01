@@ -36,3 +36,22 @@ export async function saveFile(rootRelativePath, content) {
   if (!res.ok || !data.ok) throw new Error(data.error || `server returned HTTP ${res.status}`);
   return data;
 }
+
+// The one folder the admin tool may delete from is skins/ -- see
+// delete.php for why deleting is narrower than saving. Throws with the
+// server's reason on refusal (a system skin, a missing file), same
+// contract as saveFile above.
+export async function deleteFile(rootRelativePath) {
+  const formData = new FormData();
+  formData.append('path', rootRelativePath);
+  formData.append('csrf', CSRF_TOKEN);
+  const res = await fetch('delete.php', { method: 'POST', body: formData, credentials: 'same-origin' });
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`server returned HTTP ${res.status} (not JSON -- is PHP running?)`);
+  }
+  if (!res.ok || !data.ok) throw new Error(data.error || `server returned HTTP ${res.status}`);
+  return data;
+}

@@ -37,5 +37,8 @@
   "powerup-hourglass",
   "powerup-weapon-harpoon",
   "powerup-weapon-grapple",
-  "powerup-weapon-machinegun"
+  "powerup-weapon-machinegun",
+  "powerup-reverse-controls",
+  "powerup-disable-shooting",
+  "powerup-freeze-player"
 ]

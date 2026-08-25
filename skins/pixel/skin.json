@@ -1,0 +1,9 @@
+{
+  "id": "pixel",
+  "name": "Pixel",
+  "description": "The original hand-drawn pixel art look.",
+  "system": true,
+  "enabled": true,
+  "render": { "pixelArt": true },
+  "overrides": []
+}

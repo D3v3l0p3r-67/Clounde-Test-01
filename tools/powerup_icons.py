@@ -191,7 +191,44 @@ GLYPHS = {
         '..###..',
         '...#...',
     ],
+    # Two arrows pointing INTO each other: which way is which is exactly
+    # the question this power-up makes you ask.
+    'reverse_controls': [
+        '..#....',
+        '.##....',
+        '#######',
+        '.##....',
+        '....##.',
+        '#######',
+        '....##.',
+        '....#..',
+    ],
+    # The harpoon's own upward arrow with a bar through it.
+    'disable_shooting': [
+        '...#...',
+        '..###..',
+        '.#.#.#.',
+        '#..#..#',
+        '...#..#',
+        '...#.#.',
+        '..##.#.',
+        '..#.#..',
+        '...#...',
+    ],
+    # An ice block, mid-freeze: the outline is the cube, the dot the
+    # player inside it.
+    'freeze_player': [
+        '#######',
+        '#.....#',
+        '#..#..#',
+        '#.###.#',
+        '#..#..#',
+        '#.....#',
+        '#######',
+    ],
 }
+
+
 
 # The same three weapons again, at the size the HUD draws them (21x21,
 # see js/assets.js's hudWeaponIconPath) -- the frame beside the score,
@@ -295,12 +332,15 @@ def hex_to_rgb(value: str) -> tuple:
     return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def icon(color: tuple) -> Image.Image:
+def icon(color: tuple, negative: bool = False) -> Image.Image:
     img = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
     px = img.load()
     centre = (SIZE - 1) / 2
     radius = SIZE / 2 - 0.5
-    rim = shade(color, 0.55)
+    # A negative power-up wears a black ring where every helpful one has
+    # a darker shade of its own colour -- the one mark that says "do not
+    # walk into this" from across the playfield, whatever the glyph is.
+    rim = (10, 10, 10) if negative else shade(color, 0.55)
     for y in range(SIZE):
         for x in range(SIZE):
             distance = ((x - centre) ** 2 + (y - centre) ** 2) ** 0.5
@@ -308,7 +348,7 @@ def icon(color: tuple) -> Image.Image:
                 continue
             # A one-pixel darker rim, and a lift towards the top left,
             # which is where everything in this game is lit from.
-            if distance > radius - 1.2:
+            if distance > radius - (2.2 if negative else 1.2):
                 px[x, y] = (*rim, 255)
             else:
                 lift = 1.0 + 0.18 * ((centre - x) + (centre - y)) / SIZE
@@ -354,7 +394,7 @@ def main() -> None:
         if kind not in GLYPHS:
             continue
         color = hex_to_rgb(element['color'])
-        img = icon(color)
+        img = icon(color, element.get('negative') is True)
         draw_glyph(img, GLYPHS[kind], shade(color, 0.28))
         out = OUT / f'{kind}.webp'
         img.save(out, 'WEBP', lossless=True)
