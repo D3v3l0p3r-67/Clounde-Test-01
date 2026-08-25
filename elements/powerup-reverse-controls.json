@@ -1,0 +1,13 @@
+{
+  "id": "powerup-reverse-controls",
+  "category": "powerup",
+  "type": "reverse_controls",
+  "label": "Reverse Controls",
+  "color": "#b06ee8",
+  "durationMs": 6000,
+  "instant": false,
+  "negative": true,
+  "kind": "reverse_controls",
+  "params": {},
+  "pickupSound": "itemshieldloose"
+}

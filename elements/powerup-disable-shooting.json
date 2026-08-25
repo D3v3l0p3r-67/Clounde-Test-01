@@ -1,0 +1,13 @@
+{
+  "id": "powerup-disable-shooting",
+  "category": "powerup",
+  "type": "disable_shooting",
+  "label": "Disable Shooting",
+  "color": "#e8734a",
+  "durationMs": 5000,
+  "instant": false,
+  "negative": true,
+  "kind": "disable_shooting",
+  "params": {},
+  "pickupSound": "itemshieldloose"
+}

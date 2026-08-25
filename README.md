@@ -576,6 +576,50 @@ and it lost its ladder for it. `tests/levels.test.mjs` checks all four,
 plus that no start is inside an obstacle or a ball and that a guaranteed
 drop sits on a single breakable block.
 
+## Negative power-ups
+
+Three of the pickups are ones the player does NOT want, and every one of
+them wears a clearly visible **black ring** on its disc -- the one mark,
+in both skins, that says "do not walk into this" from across the
+playfield, whatever the glyph. Up close, the HUD shows an active
+negative like any other timed effect, except its countdown reads in
+danger red: a clock counting down to relief rather than to loss.
+
+| power-up | effect | default |
+| --- | --- | --- |
+| **Reverse Controls** | left is right, up is down; shoot stays -- there is nothing opposite to a trigger | 6s |
+| **Disable Shooting** | walking and climbing as normal, the trigger buys nothing | 5s |
+| **Freeze** | no movement, no shooting; gravity still applies, so a frozen player finishes falling; the icy tint on the sprite is the on-field indication | 2.5s |
+
+Freeze is the harshest, so it is deliberately the shortest -- and a test
+fails if an edit ever makes it longer than the other two. Every duration
+lives in that power-up's own `elements/powerup-*.json` (`durationMs`),
+editable in the admin Elements tab like any element; nothing is
+hardcoded. The debug panel offers all three automatically (Drop pickup /
+Use now), because its rows are built from the registry.
+
+They ride the exact architecture every helpful power-up uses -- an
+element file naming a `kind`, an apply/revert pair in
+`POWERUP_BEHAVIORS`, the `EffectManager` clock -- so adding a fourth
+negative is one JSON file and one apply/revert pair. Two details are
+where the design actually lives:
+
+**They work on the input, not on the entities.** All three apply at the
+single point where keyboard and touch have already been merged into one
+input object (`GameScene.updatePlaying`), so every input source -- and
+any future one, human or scripted -- is affected identically, and
+reverting is dropping a flag rather than un-editing physics. Freeze wins
+over reversal (no input at all leaves nothing to reverse), and a
+disabled trigger still registers presses, so it cannot be "banked" and
+fire the instant the effect ends.
+
+**Picking the same one up again refreshes it, never stacks it.** apply()
+is an idempotent flag-set and the EffectManager overwrites the expiry it
+holds for an already-active type -- the same semantics every timed
+power-up has always had, inherited rather than reimplemented. A lost
+life cleans up mid-effect too: the level reload runs every active
+effect's revert (`effects.reset`).
+
 ## Skins
 
 The game's look is a skin, and the game never knows which one it is

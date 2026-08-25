@@ -423,7 +423,12 @@ POWERUP_COLORS = {
     'hourglass': (200, 162, 255), 'rapid_shot': (255, 210, 63), 'score_multiplier': (254, 202, 87),
     'shield': (200, 214, 229), 'speed_boost': (29, 209, 161), 'time_freeze': (72, 219, 251),
     'weapon_grapple': (255, 210, 63), 'weapon_harpoon': (255, 210, 63), 'weapon_machinegun': (255, 210, 63),
+    'reverse_controls': (176, 110, 232), 'disable_shooting': (232, 115, 74), 'freeze_player': (127, 212, 240),
 }
+
+# The ones a player does not want, marked the same way the pixel skin
+# marks them: a black ring around the disc (see tools/powerup_icons.py).
+NEGATIVE_POWERUPS = {'reverse_controls', 'disable_shooting', 'freeze_player'}
 
 
 def glyph(d, kind, cx, cy, s):
@@ -474,6 +479,21 @@ def glyph(d, kind, cx, cy, s):
     elif kind == 'weapon_grapple':
         d.line([cx, cy - s * 0.9, cx, cy + s * 0.2], fill=W, width=lw)
         d.arc([cx - s * 0.6, cy - s * 0.3, cx + s * 0.6, cy + s * 0.9], start=0, end=220, fill=W, width=lw)
+    elif kind == 'reverse_controls':
+        for sy, direction in ((-0.38, -1), (0.38, 1)):
+            y = cy + s * sy
+            d.line([cx - s * 0.75, y, cx + s * 0.75, y], fill=W, width=lw)
+            tip = cx + direction * s * 0.75
+            d.polygon([(tip, y - s * 0.34), (tip, y + s * 0.34),
+                       (tip + direction * s * 0.38, y)], fill=W)
+    elif kind == 'disable_shooting':
+        d.line([cx, cy + s * 0.75, cx, cy - s * 0.45], fill=W, width=lw)
+        d.polygon([(cx, cy - s * 0.85), (cx - s * 0.45, cy - s * 0.15), (cx + s * 0.45, cy - s * 0.15)], fill=W)
+        d.line([cx - s * 0.7, cy + s * 0.7, cx + s * 0.7, cy - s * 0.7], fill=W, width=lw)
+    elif kind == 'freeze_player':
+        d.rounded_rectangle([cx - s * 0.7, cy - s * 0.7, cx + s * 0.7, cy + s * 0.7],
+                            radius=s * 0.2, outline=W, width=lw)
+        d.ellipse([cx - s * 0.2, cy - s * 0.2, cx + s * 0.2, cy + s * 0.2], fill=W)
     elif kind == 'weapon_machinegun':
         for i, oy in enumerate((-0.55, 0.05, 0.65)):
             d.rounded_rectangle([cx - s * 0.5 + i * s * 0.12, cy + s * oy - s * 0.16,
@@ -486,6 +506,10 @@ def draw_powerups():
         img = canvas(18, 18)
         glossy_disc(img, 9 * SS, 9 * SS, 8.4 * SS, color)
         glyph(ImageDraw.Draw(img), kind, 9 * SS, 9 * SS, 5.2 * SS)
+        if kind in NEGATIVE_POWERUPS:
+            d = ImageDraw.Draw(img)
+            d.ellipse([0.6 * SS, 0.6 * SS, 17.4 * SS, 17.4 * SS],
+                      outline=(8, 8, 8, 255), width=int(1.8 * SS))
         save(img, f'assets/powerups/{kind}.webp', (18, 18))
 
 

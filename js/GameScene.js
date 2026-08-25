@@ -204,6 +204,12 @@ export class GameScene extends Phaser.Scene {
     this.panicStep = -1;
     this.panicHoldLeft = 0;
     this.weaponType = 'harpoon';
+    // The negative power-ups' flags (see elements.js's reverse_controls/
+    // disable_shooting/freeze_player). Only their apply/revert ever set
+    // these; everything here just reads them.
+    this.controlsReversed = false;
+    this.shootingDisabled = false;
+    this.playerFrozen = false;
     this.volleyCounter = 0; // see fireVolley -- ids only need to be distinct
     this.scorePopups = []; // live ScorePopup instances -- see popBall/updatePlaying
     // Tracks last frame's shoot input so a held key only ever fires once
@@ -1156,6 +1162,19 @@ export class GameScene extends Phaser.Scene {
     }
 
     const inputState = this.readInput();
+    // The negative power-ups work HERE, on the one merged input object,
+    // and nowhere else: keyboard, touch, and any future source of input
+    // are all upstream of this point, so every one of them is affected
+    // alike and reverting is dropping a flag. Freeze wins over reversal
+    // -- no input at all leaves nothing to reverse -- and both run before
+    // the press edges below, so a swapped up/down still mounts ladders
+    // like a real press would.
+    if (this.playerFrozen) {
+      inputState.left = inputState.right = inputState.up = inputState.down = inputState.shoot = false;
+    } else if (this.controlsReversed) {
+      [inputState.left, inputState.right] = [inputState.right, inputState.left];
+      [inputState.up, inputState.down] = [inputState.down, inputState.up];
+    }
     // Getting ON a ladder is a press, never a hold: holding up to climb
     // one must not grab the next one the moment the player walks past its
     // foot, and holding down on top of one must not re-mount it.
@@ -1179,7 +1198,10 @@ export class GameScene extends Phaser.Scene {
     // the scene had to work out which of the two a press was meant for,
     // and a ladder underfoot made shooting unreliable. Up climbs now (see
     // keys.js's DEFAULT_BINDINGS).
-    if (inputState.shoot && !this.wasShooting) this.tryFire();
+    // disable_shooting: the press still registers (wasShooting tracks it,
+    // so the trigger cannot be "banked" and fire the instant the effect
+    // ends), it just buys nothing.
+    if (inputState.shoot && !this.wasShooting && !this.shootingDisabled) this.tryFire();
     this.wasShooting = inputState.shoot;
 
     // Last 3s of time_freeze: blink the (harmless, see onPlayerHitBall)

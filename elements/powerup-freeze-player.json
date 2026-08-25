@@ -1,0 +1,13 @@
+{
+  "id": "powerup-freeze-player",
+  "category": "powerup",
+  "type": "freeze_player",
+  "label": "Freeze",
+  "color": "#7fd4f0",
+  "durationMs": 2500,
+  "instant": false,
+  "negative": true,
+  "kind": "freeze_player",
+  "params": {},
+  "pickupSound": "itemshieldloose"
+}
