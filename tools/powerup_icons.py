@@ -337,10 +337,12 @@ def icon(color: tuple, negative: bool = False) -> Image.Image:
     px = img.load()
     centre = (SIZE - 1) / 2
     radius = SIZE / 2 - 0.5
-    # A negative power-up wears a black ring where every helpful one has
-    # a darker shade of its own colour -- the one mark that says "do not
-    # walk into this" from across the playfield, whatever the glyph is.
-    rim = (10, 10, 10) if negative else shade(color, 0.55)
+    # A negative power-up is BLACK AND WHITE and nothing else: a black
+    # disc, a white glyph, and a thin white rim so it still reads against
+    # a night sky. Every helpful one is a colour with a darker shade of
+    # itself for its rim, so "no colour at all" is the whole signal --
+    # a player never has to remember which hue means harm.
+    rim = (245, 245, 245) if negative else shade(color, 0.55)
     for y in range(SIZE):
         for x in range(SIZE):
             distance = ((x - centre) ** 2 + (y - centre) ** 2) ** 0.5
@@ -348,8 +350,12 @@ def icon(color: tuple, negative: bool = False) -> Image.Image:
                 continue
             # A one-pixel darker rim, and a lift towards the top left,
             # which is where everything in this game is lit from.
-            if distance > radius - (2.2 if negative else 1.2):
+            if distance > radius - 1.2:
                 px[x, y] = (*rim, 255)
+            elif negative:
+                # Flat black -- the lift below is what makes a coloured
+                # disc look round, and a black disc has no hue to lift.
+                px[x, y] = (12, 12, 14, 255)
             else:
                 lift = 1.0 + 0.18 * ((centre - x) + (centre - y)) / SIZE
                 px[x, y] = (*shade(color, lift), 255)
@@ -394,8 +400,11 @@ def main() -> None:
         if kind not in GLYPHS:
             continue
         color = hex_to_rgb(element['color'])
-        img = icon(color, element.get('negative') is True)
-        draw_glyph(img, GLYPHS[kind], shade(color, 0.28))
+        negative = element.get('negative') is True
+        img = icon(color, negative)
+        # A helpful disc carries its glyph in a darker shade of its own
+        # colour; a negative one carries it in plain white on the black.
+        draw_glyph(img, GLYPHS[kind], color if negative else shade(color, 0.28))
         out = OUT / f'{kind}.webp'
         img.save(out, 'WEBP', lossless=True)
         print(f'{out.relative_to(ROOT)}: {element["label"]}')

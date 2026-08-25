@@ -3,7 +3,7 @@
   "category": "powerup",
   "type": "disable_shooting",
   "label": "Disable Shooting",
-  "color": "#e8734a",
+  "color": "#ffffff",
   "durationMs": 5000,
   "instant": false,
   "negative": true,

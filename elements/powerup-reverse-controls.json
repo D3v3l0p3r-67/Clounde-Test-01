@@ -3,7 +3,7 @@
   "category": "powerup",
   "type": "reverse_controls",
   "label": "Reverse Controls",
-  "color": "#b06ee8",
+  "color": "#ffffff",
   "durationMs": 6000,
   "instant": false,
   "negative": true,

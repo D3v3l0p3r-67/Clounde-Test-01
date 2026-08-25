@@ -423,11 +423,14 @@ POWERUP_COLORS = {
     'hourglass': (200, 162, 255), 'rapid_shot': (255, 210, 63), 'score_multiplier': (254, 202, 87),
     'shield': (200, 214, 229), 'speed_boost': (29, 209, 161), 'time_freeze': (72, 219, 251),
     'weapon_grapple': (255, 210, 63), 'weapon_harpoon': (255, 210, 63), 'weapon_machinegun': (255, 210, 63),
-    'reverse_controls': (176, 110, 232), 'disable_shooting': (232, 115, 74), 'freeze_player': (127, 212, 240),
+    # The negatives are black and white in both skins (see
+    # tools/powerup_icons.py) -- the disc itself is drawn black below, so
+    # what this colour does here is only feed the glossy shading.
+    'reverse_controls': (26, 26, 30), 'disable_shooting': (26, 26, 30), 'freeze_player': (26, 26, 30),
 }
 
-# The ones a player does not want, marked the same way the pixel skin
-# marks them: a black ring around the disc (see tools/powerup_icons.py).
+# The ones a player does not want: no colour at all -- a black disc, a
+# white glyph, a thin white rim so it still reads against a night sky.
 NEGATIVE_POWERUPS = {'reverse_controls', 'disable_shooting', 'freeze_player'}
 
 
@@ -480,12 +483,15 @@ def glyph(d, kind, cx, cy, s):
         d.line([cx, cy - s * 0.9, cx, cy + s * 0.2], fill=W, width=lw)
         d.arc([cx - s * 0.6, cy - s * 0.3, cx + s * 0.6, cy + s * 0.9], start=0, end=220, fill=W, width=lw)
     elif kind == 'reverse_controls':
-        for sy, direction in ((-0.38, -1), (0.38, 1)):
+        # Short shafts, big heads: at 18px a thin arrowhead vanishes and
+        # the pair reads as an equals sign, which says nothing about
+        # directions being swapped.
+        for sy, direction in ((-0.4, -1), (0.4, 1)):
             y = cy + s * sy
-            d.line([cx - s * 0.75, y, cx + s * 0.75, y], fill=W, width=lw)
-            tip = cx + direction * s * 0.75
-            d.polygon([(tip, y - s * 0.34), (tip, y + s * 0.34),
-                       (tip + direction * s * 0.38, y)], fill=W)
+            d.line([cx - s * 0.5, y, cx + s * 0.5, y], fill=W, width=lw)
+            tip = cx + direction * s * 0.45
+            d.polygon([(tip, y - s * 0.46), (tip, y + s * 0.46),
+                       (tip + direction * s * 0.5, y)], fill=W)
     elif kind == 'disable_shooting':
         d.line([cx, cy + s * 0.75, cx, cy - s * 0.45], fill=W, width=lw)
         d.polygon([(cx, cy - s * 0.85), (cx - s * 0.45, cy - s * 0.15), (cx + s * 0.45, cy - s * 0.15)], fill=W)
@@ -509,7 +515,7 @@ def draw_powerups():
         if kind in NEGATIVE_POWERUPS:
             d = ImageDraw.Draw(img)
             d.ellipse([0.6 * SS, 0.6 * SS, 17.4 * SS, 17.4 * SS],
-                      outline=(8, 8, 8, 255), width=int(1.8 * SS))
+                      outline=(245, 245, 245, 255), width=int(1.1 * SS))
         save(img, f'assets/powerups/{kind}.webp', (18, 18))
 
 

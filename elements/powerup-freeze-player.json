@@ -3,7 +3,7 @@
   "category": "powerup",
   "type": "freeze_player",
   "label": "Freeze",
-  "color": "#7fd4f0",
+  "color": "#ffffff",
   "durationMs": 2500,
   "instant": false,
   "negative": true,

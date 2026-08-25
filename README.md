@@ -578,12 +578,19 @@ drop sits on a single breakable block.
 
 ## Negative power-ups
 
-Three of the pickups are ones the player does NOT want, and every one of
-them wears a clearly visible **black ring** on its disc -- the one mark,
-in both skins, that says "do not walk into this" from across the
-playfield, whatever the glyph. Up close, the HUD shows an active
-negative like any other timed effect, except its countdown reads in
-danger red: a clock counting down to relief rather than to loss.
+Three of the pickups are ones the player does NOT want, and they are
+**black and white and nothing else**: a black disc, a white glyph, and a
+thin white rim so they still read against a night sky. Every helpful
+power-up is a colour; the absence of colour is the whole signal, so a
+player never has to remember which hue means harm. Both skins follow the
+same rule. Up close, the HUD shows an active negative like any other
+timed effect, except its countdown reads in danger red: a clock counting
+down to relief rather than to loss.
+
+Their element `color` is white, which is what the pickup burst and the
+glyph are drawn in -- black there would have made an invisible burst
+against the sky. The black disc comes from `negative: true`, not from
+the colour field.
 
 | power-up | effect | default |
 | --- | --- | --- |
