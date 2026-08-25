@@ -43,6 +43,7 @@ $phpUser = webServerUser();
     <button class="tab-btn" data-tab="sounds">Sounds</button>
     <button class="tab-btn" data-tab="elements">Elements</button>
     <button class="tab-btn" data-tab="levels">Levels</button>
+    <button class="tab-btn" data-tab="skins">Skins</button>
   </nav>
 
   <main>
@@ -88,6 +89,7 @@ $phpUser = webServerUser();
     <section id="tab-sounds" class="tab-panel hidden"></section>
     <section id="tab-elements" class="tab-panel hidden"></section>
     <section id="tab-levels" class="tab-panel hidden"></section>
+    <section id="tab-skins" class="tab-panel hidden"></section>
   </main>
 </div>
 

@@ -286,28 +286,32 @@ test('erasing progress takes the scores and leaves the settings', async () => {
   await game.scene((s) => s.showOptions());
   await game.frames(3);
 
-  // Nothing happens on the first press but being asked, and answering no
-  // has to leave every last thing alone.
+  // ERASE PROGRESS is a door, not an action (see the README's Options
+  // notes): opening the screen does nothing, and CANCEL has to leave
+  // every last thing alone.
   await game.page.click('#btn-erase');
   await game.frames(2);
-  assert.equal(await game.page.evaluate(() => document.getElementById('erase-confirm').classList.contains('hidden')), false,
-    'ERASE PROGRESS should ask before doing anything');
-  await game.page.click('#btn-erase-no');
+  assert.equal(await game.scene((s) => s.state), 'ERASE', 'ERASE PROGRESS should only open the screen that asks');
+  assert.equal((await keys()).length, 5, 'opening the erase screen erased something');
+  await game.page.click('#btn-close-erase');
   await game.frames(2);
   assert.equal((await keys()).length, 5, 'cancelling erased something');
 
   await game.page.click('#btn-erase');
+  await game.frames(2);
   await game.page.click('#btn-erase-yes');
   await game.frames(2);
   assert.deepEqual(await keys(), ['balloonBuster.levelEdits', 'balloonBuster.settings'],
     'erasing progress must take the scores, the unlocks and the times -- and nothing else');
 
-  await game.scene((s) => s.goToMenu());
+  await game.page.click('#btn-close-erase');
   await game.frames(2);
-  await game.scene((s) => s.showOptions());
+  await game.page.click('#btn-erase');
   await game.frames(2);
   assert.equal(await game.page.evaluate(() => document.getElementById('erase-done').classList.contains('hidden')), true,
-    'reopening options should not still be announcing a previous erase');
+    'reopening the erase screen should not still be announcing a previous erase');
+  await game.page.click('#btn-close-erase');
+  await game.frames(2);
   await game.scene((s) => s.goToMenu());
   assert.equal(drainErrors(), '');
 });

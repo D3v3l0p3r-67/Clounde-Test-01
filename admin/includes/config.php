@@ -17,7 +17,7 @@ define('PROJECT_ROOT', realpath(__DIR__ . '/../..'));
 // its own PHP source (or upload new PHP anywhere) would defeat its own
 // login gate. Matches exactly what js/assets.js's path helpers already
 // generate (elements/*.json, levels/level_NN.json, assets/**).
-define('ALLOWED_SAVE_DIRS', ['elements', 'levels', 'assets']);
+define('ALLOWED_SAVE_DIRS', ['elements', 'levels', 'assets', 'skins']);
 
 // Every file extension the game's own asset pipeline ever produces (see
 // the root README's "Swapping graphics"/"Swapping sounds") -- nothing

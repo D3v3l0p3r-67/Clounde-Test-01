@@ -35,6 +35,16 @@ const WORKER_FILE = 'service-worker.js';
 // admin asked for IS on disk, and an offline copy that lags is a smaller
 // problem than a save that reports failure after succeeding.
 function refreshPrecache(string $path): array {
+    return updatePrecache($path, false);
+}
+
+// The other direction, for delete.php: a deleted file still listed in
+// the manifest would make every future install try to fetch a 404.
+function removeFromPrecache(string $path): array {
+    return updatePrecache($path, true);
+}
+
+function updatePrecache(string $path, bool $remove): array {
     $manifestPath = PROJECT_ROOT . '/' . PRECACHE_FILE;
     $workerPath = PROJECT_ROOT . '/' . WORKER_FILE;
     $target = PROJECT_ROOT . '/' . $path;
@@ -64,14 +74,19 @@ function refreshPrecache(string $path): array {
             return [false, 'sw-precache.json is not a manifest'];
         }
 
-        $hash = @hash_file('sha256', $target);
-        if ($hash === false) {
-            return [false, 'could not read the file that was just written'];
+        if ($remove) {
+            unset($manifest['files'][$path]);
+        } else {
+            $hash = @hash_file('sha256', $target);
+            if ($hash === false) {
+                return [false, 'could not read the file that was just written'];
+            }
+            // A file the manifest has never heard of is appended rather
+            // than refused -- the next release run puts it in the tool's
+            // own walk order, and until then it is cached like
+            // everything else.
+            $manifest['files'][$path] = substr($hash, 0, 16);
         }
-        // A file the manifest has never heard of is appended rather than
-        // refused -- the next release run puts it in the tool's own walk
-        // order, and until then it is cached like everything else.
-        $manifest['files'][$path] = substr($hash, 0, 16);
 
         $overall = hash_init('sha256');
         foreach ($manifest['files'] as $file => $digest) {
