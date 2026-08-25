@@ -36,7 +36,6 @@ FONT_BOLD = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 # different temperature from the base skin's warm gold, so the two are
 # never mistaken for each other.
 ACCENT = (76, 201, 240)
-TEXT = (232, 238, 248)
 
 BALL_COLORS = {
     'round': (255, 89, 100),
@@ -345,7 +344,6 @@ def beam_cell(d, cx, color, head='arrow'):
     """One 36x400 shot cell at supersample: a glowing core the full
     height, a head at the top."""
     core_w = 3 * SS  # half of SHOT_BEAM_WIDTH (6px) each side
-    d_img = d._image if hasattr(d, '_image') else None
     for spread, alpha in [(3.2, 40), (2.2, 80), (1.2, 160), (0.55, 255)]:
         d.rounded_rectangle([cx - core_w * spread, 8 * SS, cx + core_w * spread, 400 * SS],
                             radius=core_w * spread, fill=color + (alpha,))
@@ -380,7 +378,7 @@ def draw_weapons():
         for y in range(14, 400, 10):
             d.rounded_rectangle([cx - 1.6 * SS, y * SS, cx + 1.6 * SS, (y + 6) * SS],
                                 radius=1.6 * SS, fill=chain_color + (alpha,))
-        hook_head(d, cx, 8 * SS, (255, 214, 90) if cell < 3 else (255, 214, 90), claws)
+        hook_head(d, cx, 8 * SS, (255, 214, 90), claws)
     save(img, 'assets/weapons/shots.webp', (144, 400))
 
     img = canvas(6, 12)
@@ -744,7 +742,7 @@ def draw_hud():
     for kind in ['weapon_harpoon', 'weapon_grapple', 'weapon_machinegun']:
         img = canvas(21, 21)
         glyph(ImageDraw.Draw(img), kind, 10.5 * SS, 10.5 * SS, 7.5 * SS)
-        save(img, f'assets/hud/{kind.replace("weapon_", "weapon_")}.webp', (21, 21))
+        save(img, f'assets/hud/{kind}.webp', (21, 21))
 
 
 def draw_loading():
