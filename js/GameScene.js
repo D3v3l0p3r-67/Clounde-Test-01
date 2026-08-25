@@ -766,6 +766,17 @@ export class GameScene extends Phaser.Scene {
         // waits until the plane has landed and the map has faded.
         if (crossesRegion(from, to)) {
           this.audio.stopMusic();
+          // The new level has to WAIT under the map, not play under it.
+          // Arcade steps every frame regardless of the state machine, and
+          // startLevelIntro -- whose pause normally covers this -- only
+          // fires once the plane has landed: measured, that left the
+          // freshly-placed balls under live physics for the interlude's
+          // whole four-plus seconds, so the map faded out onto balls
+          // hundreds of pixels from their authored spawns, visibly in
+          // flight before READY. Paused here, they sit at their spawns
+          // behind the map and the countdown's own resume drops them
+          // from exactly where the level file says they start.
+          this.physics.pause();
           // No lead-in needed here: the interlude runs for seconds after
           // the transition has ended, so by the time this fires the new
           // level has long been in place.
